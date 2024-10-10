@@ -7,6 +7,8 @@ import com.backend.gobierno.models.Feature;
 import com.backend.gobierno.models.Task;
 import com.backend.gobierno.repositories.FeatureRepository;
 import com.backend.gobierno.repositories.TaskRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +28,6 @@ public class FeatureService {
     @Autowired
     private PythonIntegrationService pythonIntegrationService;
 
-    // Método para crear una nueva característica junto con sus tareas
     public Feature createFeature(FeatureDTO featureDTO) {
         Feature feature = new Feature();
         feature.setTitle(featureDTO.getTitle());
@@ -36,15 +37,22 @@ public class FeatureService {
         for (TaskDTO taskDTO : featureDTO.getTasks()) {
             Task task = new Task();
             task.setSummary(taskDTO.getSummary());
-            task.setDescription(taskDTO.getDescription());
             task.setSprint(taskDTO.getSprint());
             task.setPriority(taskDTO.getPriority());
-            task.setType(taskDTO.getType());
+            task.setType(taskDTO.getType());  // Mapea issueType
+            task.setStatus(taskDTO.getStatus());
+            task.setCommentCount(taskDTO.getCommentCount());
+            task.setVotes(taskDTO.getVotes());
+            task.setBlockedBy(taskDTO.getBlockedBy());
+            task.setBlocks(taskDTO.getBlocks());
+            task.setDependedOnBy(taskDTO.getDependedOnBy());
+            task.setDependedOn(taskDTO.getDependedOn());
 
-            // Llamada al servicio de integración con la API de Python para predecir story points y riesgo
+            // Llamar a la API de Python con la tarea y obtener predicción
             PythonPrediction prediction = pythonIntegrationService.getPrediction(task);
+
+            // Asignar la predicción a la tarea
             task.setStoryPoint(prediction.getStoryPoint());
-            task.setRisk(prediction.getRisk());
 
             // Asignar la característica a la tarea
             task.setFeature(feature);
@@ -62,7 +70,6 @@ public class FeatureService {
             List<TaskDTO> taskDTOs = feature.getTasks().stream().map(task -> {
                 TaskDTO taskDTO = new TaskDTO();
                 taskDTO.setSummary(task.getSummary());
-                taskDTO.setDescription(task.getDescription());
                 taskDTO.setSprint(task.getSprint());
                 taskDTO.setPriority(task.getPriority());
                 taskDTO.setType(task.getType());

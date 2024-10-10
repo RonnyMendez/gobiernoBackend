@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
@@ -21,23 +22,23 @@ public class PythonIntegrationService {
     private RestTemplate restTemplate;
 
     public PythonPrediction getPrediction(Task task) {
-        String pythonApiUrl = "http://127.0.0.1:5000/predict";
+        String pythonApiUrl = "http://127.0.0.1:5000/predict";  // URL de la API de Python
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // Crear el cuerpo de la solicitud para la API de Python
-        Map<String, Object> requestBody = new HashMap<>();
+        // Asegurarse de que los campos se envíen en el orden correcto
+        Map<String, Object> requestBody = new LinkedHashMap<>();  // Usar LinkedHashMap para mantener el orden
         requestBody.put("issueType", task.getType());
         requestBody.put("sprint", task.getSprint());
         requestBody.put("summary", task.getSummary());
-        requestBody.put("status", 2); // Asumimos que el status es "To Do" inicialmente
+        requestBody.put("status", task.getStatus());
         requestBody.put("priority", task.getPriority());
-        requestBody.put("commentCount", 0);
-        requestBody.put("votes", 0);
-        requestBody.put("blockedBy", 0);
-        requestBody.put("blocks", 0);
-        requestBody.put("dependedOnBy", 0);
-        requestBody.put("dependedOn", 0);
+        requestBody.put("commentCount", task.getCommentCount());
+        requestBody.put("votes", task.getVotes());
+        requestBody.put("blockedBy", task.getBlockedBy());
+        requestBody.put("blocks", task.getBlocks());
+        requestBody.put("dependedOnBy", task.getDependedOnBy());
+        requestBody.put("dependedOn", task.getDependedOn());
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
